@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clients</title>
+    <link rel="shortcut icon" type="image/jpg" href="assets/Images/Reframe.png"/>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <img class="topBanner"src="assets/Images/Frame 3.jpg">
+    <div class="content">
+        <h1 class="title">ReFrame Social Media Journal</h1>
+
+        <div class="padding36">
+            <t id=usageCounter>Total Time Spent On Social Media: 0 minutes</t>
+        </div>
+
+        <t class="sectionTitle"> Create Entry</t>
+
+        <div class="padding16">
+            <input id = "platform" placeholder="Platform"></input>
+            <input id = "timeSpent" placeholder="Time Spent (mins)"></input>
+            <button #submit, action='#', onclick="createEntry()">Create New Entry</button>
+        </div>
+
+        <table id="entriesTable" class="content">
+            <tr>
+                <th>Platform</th>
+                <th>Time Spent (mins)</th>
+                <th>Date registered</th>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+
+        let url = '/getEntries'
+
+        getEntries();
+
+        function getEntries() {
+            var http = new XMLHttpRequest();
+
+            http.open('GET', url, true);
+
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            http.onload = () => {
+                
+                var allEntries = http.response;
+                let parsedEntries = JSON.parse(allEntries)
+                var table = document.getElementById("entriesTable");
+                var usage = document.getElementById("usageCounter");
+                var count = 0;
+                table.innerHTML = "";
+                var header = table.createTHead(0);
+                var headerRow = table.insertRow(0);
+                var cell1 = headerRow.insertCell(0);
+                var cell2 = headerRow.insertCell(1);
+                var cell3 = headerRow.insertCell(2);
+                cell1.innerHTML = "<b>Platform</b>";
+                cell2.innerHTML = "<b>Time Spent (mins)</b>";
+                cell3.innerHTML = "<b>Date</b>";
+
+                parsedEntries.forEach((thing, i) => {
+                    var row = table.insertRow(i+1);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    count = count + thing.timeSpent;
+                    cell1.innerHTML = thing.platform;
+                    cell2.innerHTML = thing.timeSpent;
+                    cell3.innerHTML = thing.date;
+                });
+
+                usage.innerHTML = "Total Time Spent On Social Media: " + count + " minutes";
+            };
+            http.send();
+        };
+
+        function createEntry() {
+            console.log("running createEntry")
+            var url = '/postEntries';
+            var http = new XMLHttpRequest();
+
+            platform = document.getElementById('platform').value;
+            timeSpent = document.getElementById('timeSpent').value;
+
+            http.open('POST', url, true);
+            http.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+            http.setRequestHeader('Accept', 'application/x-www-form-urlencoded')
+            http.send("platform="+platform+"&timeSpent="+timeSpent)
+
+            setTimeout(function() { getEntries(); }, 100);     
+        }
+    </script>
+
+</body>
+</html>
